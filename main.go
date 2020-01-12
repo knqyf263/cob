@@ -182,7 +182,7 @@ func generateRow(ref string, b *parse.Benchmark, benchmem bool) []string {
 
 func showResult(rows [][]string, benchmem bool) {
 	fmt.Println("\nResult")
-	fmt.Println(strings.Repeat("=", 6), "\n")
+	fmt.Printf("%s\n\n", strings.Repeat("=", 6))
 
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetAutoFormatHeaders(false)
@@ -200,7 +200,7 @@ func showResult(rows [][]string, benchmem bool) {
 
 func showRatio(results []result, benchmem bool, threshold float64, onlyDegression bool) bool {
 	fmt.Println("\nComparison")
-	fmt.Println(strings.Repeat("=", 10), "\n")
+	fmt.Printf("%s\n\n", strings.Repeat("=", 10))
 
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetAutoFormatHeaders(false)
