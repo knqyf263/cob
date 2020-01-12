@@ -140,7 +140,10 @@ func run(c config) error {
 		})
 	}
 
-	showResult(rows, c.benchmem)
+	if !c.onlyDegression {
+		showResult(rows, c.benchmem)
+	}
+
 	degression := showRatio(ratios, c.benchmem, c.threshold, c.onlyDegression)
 	if degression {
 		return xerrors.New("This commit makes benchmarks worse")
