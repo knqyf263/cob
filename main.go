@@ -37,7 +37,7 @@ func main() {
 			&cli.Float64Flag{
 				Name:  "threshold",
 				Usage: "The program fails if the benchmark gets worse than the threshold",
-				Value: 0.1,
+				Value: 0.2,
 			},
 			&cli.StringFlag{
 				Name:  "bench",
