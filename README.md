@@ -8,13 +8,102 @@
 
 
 # Abstract
-`cob` compares benchmarks between the latest commit and the previous commit. The program will fail if the change in score is worse than the threshold. This tools is suitable for CI/CD.
+`cob` compares benchmarks between the latest commit and the previous commit. The program will fail if the change in score is worse than the threshold. This tools is suitable for CI/CD to detect a regression of a performance automatically.
 
 <img src="img/usage.png" width="700">
 
 Internally `cob` runs `go test -bench` before and after commit.
 
+
+# Table of Contents
+<!-- TOC -->
+- [Abstract](#abstract)
+- [Continuous Integration (CI)](#continuous-integration-ci)
+  - [GitHub Actions](#github-actions)
+  - [Travis CI](#travis-ci)
+  - [CircleCI](#circleci)
+- [Example](#example)
+  - [Print memory allocation statistics for benchmarks](#print-memory-allocation-statistics-for-benchmarks)
+  - [Run only those benchmarks matching a regular expression](#run-only-those-benchmarks-matching-a-regular-expression)
+  - [Show only benchmarks with worse score](#show-only-benchmarks-with-worse-score)
+  - [Specify a threshold](#specify-a-threshold)
+- [Usage](#usage)
+- [Q&A](#qa)
+  - [A result of benchmarks is unstable](#a-result-of-benchmarks-is-unstable)
+
 # Continuous Integration (CI)
+
+See [cob-example](https://github.com/knqyf263/cob-example) for details.
+
+## GitHub Actions
+
+```
+name: Bench
+on: [push, pull_request]
+jobs:
+  test:
+    name: Bench
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Set up Go 1.13
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v1
+
+    - name: Env
+      run: echo $PATH
+
+    - name: Install GolangCI-Lint
+      run: curl -sfL https://raw.githubusercontent.com/knqyf263/cob/master/install.sh | sudo sh -s -- -b /usr/local/bin
+
+    - name: Run Benchmark
+      run: cob -benchmem ./...
+```
+
+## Travis CI
+
+```
+dist: bionic
+
+language: go
+
+go:
+  - 1.13.x
+
+before_script:
+  - curl -sfL https://raw.githubusercontent.com/knqyf263/cob/master/install.sh | sudo sh -s -- -b /usr/local/bin
+
+script:
+  - cob -benchmem ./...
+```
+
+## CircleCI
+
+```
+version: 2
+jobs:
+  bench:
+    docker:
+      - image: circleci/golang:1.13
+    steps:
+      - checkout
+      - run:
+          name: Install cob
+          command: curl -sfL https://raw.githubusercontent.com/knqyf263/cob/master/install.sh | sudo sh -s -- -b /usr/local/bin
+      - run:
+          name: Run cob
+          command: cob -benchmem ./...
+workflows:
+  version: 2
+  build-workflow:
+    jobs:
+      - bench
+```
 
 
 
@@ -126,6 +215,14 @@ Comparison
 
 </details>
 
+## Specify a threshold
+
+The following option means the program fails if score worse than 50%.
+
+```
+$ cob -threshold 0.5 ./...
+```
+
 # Usage
 
 ```
@@ -148,3 +245,21 @@ GLOBAL OPTIONS:
    --help, -h         show help (default: false)
 
 ```
+
+# Q&A
+
+## A result of benchmarks is unstable
+
+You can specify `--benchtime`.
+
+```
+$ cob -benchtime 10s ./...
+```
+
+# License
+
+This repository is available under the [MIT](https://github.com/knqyf263/cob/blob/master/LICENSE)
+
+# Author
+
+[Teppei Fukuda](https://github.com/knqyf263) (knqyf263)
