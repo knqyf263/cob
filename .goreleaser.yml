@@ -1,39 +1,71 @@
-release:
-  github:
-    owner: knqyf263
-    name: cob
-  name_template: '{{.Tag}}'
+project_name: cob
+before:
+  hooks:
+    - go mod tidy
 builds:
-- goos:
-  - linux
-  - darwin
-  - windows
-  goarch:
-  - amd64
-  - "386"
-  main: .
-  ldflags: -s -w -X main.commit={{.Commit}}
-archive:
-  format: zip
-  name_template: '{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
-  files:
-  - LICENSE*
-  - README*
-  - CHANGELOG*
-  - CREDITS
-nfpm:
-  name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-  replacements:
-    amd64: 64-bit
-    386: 32-bit
-    darwin: macOS
-    linux: Linux
-  vendor: knqyf263
-  homepage: https://github.com/knqyf263/cob
-  maintainer: Teppei Fukuda <knqyf263@gmail.com>
-  license: MIT
-  formats:
-  - deb
-  - rpm
-checksum:
-  name_template: '{{ .ProjectName }}_{{ .Version }}_checksums.txt'
+  -
+    main: .
+    binary: cob
+    ldflags: 
+      - -s -w
+      - "-extldflags '-static'"
+      - -X main.version={{.Version}}
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - freebsd
+      - openbsd
+    goarch:
+      - amd64
+      - 386
+      - arm
+      - arm64
+    goarm:
+      - 7
+
+nfpms:
+  -
+    formats:
+      - deb
+      - rpm
+    dependencies:
+      - rpm
+    vendor: "knqyf263"
+    homepage: "https://github.com/knqyf263"
+    maintainer: "Teppei Fukuda <knqyf263@gmail.com>"
+    description: "Continuous Benchmark for Go Project"
+    license: "MIT"
+    file_name_template: "{{.ProjectName}}_{{.Version}}_{{.Os}}-{{.Arch}}"
+    replacements:
+      amd64: 64bit
+      386: 32bit
+      arm: ARM
+      arm64: ARM64
+      darwin: macOS
+      linux: Linux
+      openbsd: OpenBSD
+      netbsd: NetBSD
+      freebsd: FreeBSD
+      dragonfly: DragonFlyBSD
+
+archives:
+  -
+    format: tar.gz
+    name_template: "{{.ProjectName}}_{{.Version}}_{{.Os}}-{{.Arch}}"
+    replacements:
+      amd64: 64bit
+      386: 32bit
+      arm: ARM
+      arm64: ARM64
+      darwin: macOS
+      linux: Linux
+      openbsd: OpenBSD
+      netbsd: NetBSD
+      freebsd: FreeBSD
+      dragonfly: DragonFlyBSD
+    files:
+      - README.md
+      - LICENSE
+
