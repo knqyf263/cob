@@ -127,7 +127,7 @@ func run(c config) error {
 
 		var ratioAllocedBytesPerOp float64
 		if prevBench.AllocedBytesPerOp != 0 {
-			ratioAllocedBytesPerOp = float64(headBench.AllocedBytesPerOp-prevBench.AllocedBytesPerOp) / float64(prevBench.AllocedBytesPerOp)
+			ratioAllocedBytesPerOp = (float64(headBench.AllocedBytesPerOp) - float64(prevBench.AllocedBytesPerOp)) / float64(prevBench.AllocedBytesPerOp)
 		}
 
 		rows = append(rows, generateRow("HEAD", headBench, c.benchmem))
@@ -202,9 +202,6 @@ func showResult(rows [][]string, benchmem bool) {
 }
 
 func showRatio(results []result, benchmem bool, threshold float64, onlyDegression bool) bool {
-	fmt.Println("\nComparison")
-	fmt.Printf("%s\n\n", strings.Repeat("=", 10))
-
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetAutoFormatHeaders(false)
 	table.SetAlignment(tablewriter.ALIGN_CENTER)
@@ -217,11 +214,13 @@ func showRatio(results []result, benchmem bool, threshold float64, onlyDegressio
 
 	var degression bool
 	for _, result := range results {
-		if onlyDegression &&
-			(result.RatioNsPerOp <= threshold && result.RatioAllocedBytesPerOp <= threshold) {
-			continue
+		if threshold < result.RatioNsPerOp || threshold < result.RatioAllocedBytesPerOp {
+			degression = true
+		} else {
+			if onlyDegression {
+				continue
+			}
 		}
-		degression = true
 		row := []string{result.Name, generateRatioItem(result.RatioNsPerOp)}
 		if benchmem {
 			row = append(row, generateRatioItem(result.RatioAllocedBytesPerOp))
@@ -232,8 +231,13 @@ func showRatio(results []result, benchmem bool, threshold float64, onlyDegressio
 		colors = append(colors, generateColor(result.RatioAllocedBytesPerOp))
 		table.Rich(row, colors)
 	}
-	table.Render()
-	fmt.Println()
+	if table.NumLines() > 0 {
+		fmt.Println("\nComparison")
+		fmt.Printf("%s\n\n", strings.Repeat("=", 10))
+
+		table.Render()
+		fmt.Println()
+	}
 	return degression
 }
 
