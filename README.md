@@ -1,4 +1,5 @@
 # cob
+Continuous Benchmark for Go Project
 
 [![GitHub release](https://img.shields.io/github/release/knqyf263/cob.svg)](https://github.com/knqyf263/cob/releases/latest)
 ![](https://github.com/knqyf263/cob/workflows/Go/badge.svg)
@@ -12,7 +13,7 @@
 
 <img src="img/usage.png" width="700">
 
-Internally `cob` runs `go test -bench` before and after commit.
+`cob` runs `go test -bench` before and after commit internally, so it depends on `go` command.
 
 
 # Table of Contents
@@ -54,9 +55,6 @@ jobs:
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v1
-
-    - name: Env
-      run: echo $PATH
 
     - name: Install GolangCI-Lint
       run: curl -sfL https://raw.githubusercontent.com/knqyf263/cob/master/install.sh | sudo sh -s -- -b /usr/local/bin
@@ -104,8 +102,6 @@ workflows:
     jobs:
       - bench
 ```
-
-
 
 
 # Example
@@ -217,7 +213,7 @@ Comparison
 
 ## Specify a threshold
 
-The following option means the program fails if score worse than 50%.
+The following option means the program fails if a benchmark score gets worse than 50%.
 
 ```
 $ cob -threshold 0.5 ./...
@@ -247,6 +243,15 @@ GLOBAL OPTIONS:
 ```
 
 # Q&A
+
+## Benchmarks with the same name
+
+Specify a package name.
+
+```
+$ cob -benchmem ./foo
+$ cob -benchmem ./bar
+```
 
 ## A result of benchmarks is unstable
 
