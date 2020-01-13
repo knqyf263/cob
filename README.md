@@ -14,6 +14,7 @@
 
 `cob` runs `go test -bench` before and after commit internally, so it depends on `go` command.
 
+**CAUTION: Note that `git reset` is executed when you run `cob`. You should commit all changes before running `cob`.**
 
 # Table of Contents
 <!-- TOC -->
