@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -141,10 +142,10 @@ func run(c config) error {
 	}
 
 	if !c.onlyDegression {
-		showResult(rows, c.benchmem)
+		showResult(os.Stdout, rows, c.benchmem)
 	}
 
-	degression := showRatio(ratios, c.benchmem, c.threshold, c.onlyDegression)
+	degression := showRatio(os.Stdout, ratios, c.benchmem, c.threshold, c.onlyDegression)
 	if degression {
 		return xerrors.New("This commit makes benchmarks worse")
 	}
@@ -183,11 +184,11 @@ func generateRow(ref string, b *parse.Benchmark, benchmem bool) []string {
 	return row
 }
 
-func showResult(rows [][]string, benchmem bool) {
-	fmt.Println("\nResult")
-	fmt.Printf("%s\n\n", strings.Repeat("=", 6))
+func showResult(w io.Writer, rows [][]string, benchmem bool) {
+	fmt.Fprintln(w, "\nResult")
+	fmt.Fprintf(w, "%s\n\n", strings.Repeat("=", 6))
 
-	table := tablewriter.NewWriter(os.Stdout)
+	table := tablewriter.NewWriter(w)
 	table.SetAutoFormatHeaders(false)
 	table.SetAlignment(tablewriter.ALIGN_CENTER)
 	headers := []string{"Name", "Commit", "NsPerOp"}
@@ -201,8 +202,8 @@ func showResult(rows [][]string, benchmem bool) {
 	table.Render()
 }
 
-func showRatio(results []result, benchmem bool, threshold float64, onlyDegression bool) bool {
-	table := tablewriter.NewWriter(os.Stdout)
+func showRatio(w io.Writer, results []result, benchmem bool, threshold float64, onlyDegression bool) bool {
+	table := tablewriter.NewWriter(w)
 	table.SetAutoFormatHeaders(false)
 	table.SetAlignment(tablewriter.ALIGN_CENTER)
 	table.SetRowLine(true)
@@ -232,11 +233,11 @@ func showRatio(results []result, benchmem bool, threshold float64, onlyDegressio
 		table.Rich(row, colors)
 	}
 	if table.NumLines() > 0 {
-		fmt.Println("\nComparison")
-		fmt.Printf("%s\n\n", strings.Repeat("=", 10))
+		fmt.Fprintln(w, "\nComparison")
+		fmt.Fprintf(w, "%s\n\n", strings.Repeat("=", 10))
 
 		table.Render()
-		fmt.Println()
+		fmt.Fprintln(w)
 	}
 	return degression
 }
