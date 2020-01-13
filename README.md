@@ -9,7 +9,7 @@ Continuous Benchmark for Go Project
 
 
 # Abstract
-`cob` compares benchmarks between the latest commit and the previous commit. The program will fail if the change in score is worse than the threshold. This tools is suitable for CI/CD to detect a regression of a performance automatically.
+`cob` compares benchmarks between the latest commit (HEAD) and the previous commit (HEAD{@1}). The program will fail if the change in score is worse than the threshold. This tools is suitable for CI/CD to detect a regression of a performance automatically.
 
 <img src="img/usage.png" width="700">
 
@@ -67,9 +67,7 @@ jobs:
 
 ```
 dist: bionic
-
 language: go
-
 go:
   - 1.13.x
 
