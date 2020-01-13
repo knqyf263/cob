@@ -1,5 +1,4 @@
-# cob
-Continuous Benchmark for Go Project
+<img src="img/logo.png" width="350">
 
 [![GitHub release](https://img.shields.io/github/release/knqyf263/cob.svg)](https://github.com/knqyf263/cob/releases/latest)
 ![](https://github.com/knqyf263/cob/workflows/Go/badge.svg)
