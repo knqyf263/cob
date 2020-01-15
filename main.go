@@ -54,6 +54,10 @@ func main() {
 				Usage: "Run enough iterations of each benchmark to take t, specified as a time.Duration (for example, -benchtime 1h30s).",
 				Value: "1s",
 			},
+			&cli.StringFlag{
+				Name:  "tags",
+				Usage: "Run only those benchmarks with the specified build tags.",
+			},
 		},
 	}
 
@@ -166,6 +170,9 @@ func prepareBenchArgs(c config) []string {
 	args := []string{"test", "-benchtime", c.benchtime, "-bench", c.bench}
 	if c.benchmem {
 		args = append(args, "-benchmem")
+	}
+	if c.tags != "" {
+		args = append(args, "-tags", c.tags)
 	}
 	args = append(args, c.args...)
 	return args

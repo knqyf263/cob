@@ -9,6 +9,7 @@ type config struct {
 	bench          string
 	benchmem       bool
 	benchtime      string
+	tags           string
 }
 
 func newConfig(c *cli.Context) config {
@@ -19,5 +20,6 @@ func newConfig(c *cli.Context) config {
 		bench:          c.String("bench"),
 		benchmem:       c.Bool("benchmem"),
 		benchtime:      c.String("benchtime"),
+		tags:           c.String("tags"),
 	}
 }
