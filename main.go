@@ -9,6 +9,8 @@ import (
 	"os/exec"
 	"strings"
 
+	"gopkg.in/src-d/go-git.v4/plumbing"
+
 	"golang.org/x/xerrors"
 
 	"github.com/olekukonko/tablewriter"
@@ -39,6 +41,11 @@ func main() {
 				Name:  "threshold",
 				Usage: "The program fails if the benchmark gets worse than the threshold",
 				Value: 0.2,
+			},
+			&cli.StringFlag{
+				Name:  "base",
+				Usage: "Specify a base commit compared with HEAD",
+				Value: "HEAD~1",
 			},
 			&cli.StringFlag{
 				Name:  "bench",
@@ -78,7 +85,7 @@ func run(c config) error {
 		return xerrors.Errorf("unable to get the reference where HEAD is pointing to: %w", err)
 	}
 
-	prev, err := r.ResolveRevision("HEAD~1")
+	prev, err := r.ResolveRevision(plumbing.Revision(c.base))
 	if err != nil {
 		return xerrors.Errorf("unable to resolves revision to corresponding hash: %w", err)
 	}
@@ -104,7 +111,7 @@ func run(c config) error {
 
 	args := prepareBenchArgs(c)
 
-	log.Printf("Run Benchmark: %s %s", prev, "HEAD{@1}")
+	log.Printf("Run Benchmark: %s %s", prev, c.base)
 	prevSet, err := runBenchmark(args)
 	if err != nil {
 		return xerrors.Errorf("failed to run a benchmark: %w", err)
