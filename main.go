@@ -25,6 +25,11 @@ type result struct {
 	RatioAllocedBytesPerOp float64
 }
 
+type comparedScore struct {
+	nsPerOp           bool
+	allocedBytesPerOp bool
+}
+
 func main() {
 	app := &cli.App{
 		Name:  "cob",
@@ -46,6 +51,11 @@ func main() {
 				Name:  "base",
 				Usage: "Specify a base commit compared with HEAD",
 				Value: "HEAD~1",
+			},
+			&cli.StringFlag{
+				Name:  "compare",
+				Usage: "Which score to compare",
+				Value: "ns/op,B/op",
 			},
 			&cli.StringFlag{
 				Name:  "bench-cmd",
@@ -159,7 +169,7 @@ func run(c config) error {
 		showResult(os.Stdout, rows)
 	}
 
-	degression := showRatio(os.Stdout, ratios, c.threshold, c.onlyDegression)
+	degression := showRatio(os.Stdout, ratios, c.threshold, whichScoreToCompare(c.compare), c.onlyDegression)
 	if degression {
 		return xerrors.New("This commit makes benchmarks worse")
 	}
@@ -201,7 +211,7 @@ func showResult(w io.Writer, rows [][]string) {
 	table.Render()
 }
 
-func showRatio(w io.Writer, results []result, threshold float64, onlyDegression bool) bool {
+func showRatio(w io.Writer, results []result, threshold float64, comparedScore comparedScore, onlyDegression bool) bool {
 	table := tablewriter.NewWriter(w)
 	table.SetAutoFormatHeaders(false)
 	table.SetAlignment(tablewriter.ALIGN_CENTER)
@@ -211,7 +221,9 @@ func showRatio(w io.Writer, results []result, threshold float64, onlyDegression 
 
 	var degression bool
 	for _, result := range results {
-		if threshold < result.RatioNsPerOp || threshold < result.RatioAllocedBytesPerOp {
+		if comparedScore.nsPerOp && threshold < result.RatioNsPerOp {
+			degression = true
+		} else if comparedScore.allocedBytesPerOp && threshold < result.RatioAllocedBytesPerOp {
 			degression = true
 		} else {
 			if onlyDegression {
@@ -219,9 +231,15 @@ func showRatio(w io.Writer, results []result, threshold float64, onlyDegression 
 			}
 		}
 		row := []string{result.Name, generateRatioItem(result.RatioNsPerOp), generateRatioItem(result.RatioAllocedBytesPerOp)}
-		colors := []tablewriter.Colors{{}}
-		colors = append(colors, generateColor(result.RatioNsPerOp))
-		colors = append(colors, generateColor(result.RatioAllocedBytesPerOp))
+		colors := []tablewriter.Colors{{}, generateColor(result.RatioNsPerOp), generateColor(result.RatioAllocedBytesPerOp)}
+		if !comparedScore.nsPerOp {
+			row[1] = "-"
+			colors[1] = tablewriter.Colors{}
+		}
+		if !comparedScore.allocedBytesPerOp {
+			row[2] = "-"
+			colors[2] = tablewriter.Colors{}
+		}
 		table.Rich(row, colors)
 	}
 	if table.NumLines() > 0 {
@@ -249,4 +267,19 @@ func generateColor(ratio float64) tablewriter.Colors {
 		return tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiRedColor}
 	}
 	return tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlueColor}
+}
+
+func whichScoreToCompare(c []string) comparedScore {
+	var comparedScore comparedScore
+	for _, cc := range c {
+		switch cc {
+		case "ns/op":
+			fmt.Println("cpu")
+			comparedScore.nsPerOp = true
+		case "B/op":
+			fmt.Println("memory")
+			comparedScore.allocedBytesPerOp = true
+		}
+	}
+	return comparedScore
 }
