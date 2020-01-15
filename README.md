@@ -28,6 +28,7 @@
   - [Run only those benchmarks matching a regular expression](#run-only-those-benchmarks-matching-a-regular-expression)
   - [Show only benchmarks with worse score](#show-only-benchmarks-with-worse-score)
   - [Specify a threshold](#specify-a-threshold)
+  - [Specify a base commit compared with HEAD](#specify-a-base-commit-compared-with-head)
 - [Usage](#usage)
 - [Q&A](#qa)
   - [A result of benchmarks is unstable](#a-result-of-benchmarks-is-unstable)
@@ -215,6 +216,13 @@ The following option means the program fails if a benchmark score gets worse tha
 
 ```
 $ cob -threshold 0.5 ./...
+```
+
+## Specify a base commit compared with HEAD
+By default, `cob` uses `HEAD~1`. If you compare benchmarks with different commit, you can use `--base` option.
+
+```
+$ cob --base origin/master ./...
 ```
 
 # Usage
