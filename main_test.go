@@ -61,6 +61,7 @@ func Test_showRatio(t *testing.T) {
 	type args struct {
 		results        []result
 		threshold      float64
+		compare        comparedScore
 		onlyDegression bool
 	}
 	tests := []struct {
@@ -79,7 +80,11 @@ func Test_showRatio(t *testing.T) {
 						RatioAllocedBytesPerOp: 0.5,
 					},
 				},
-				threshold:      0.2,
+				threshold: 0.2,
+				compare: comparedScore{
+					nsPerOp:           true,
+					allocedBytesPerOp: true,
+				},
 				onlyDegression: false,
 			},
 			want: true,
@@ -110,7 +115,11 @@ Comparison
 						RatioAllocedBytesPerOp: 0.5,
 					},
 				},
-				threshold:      0.95,
+				threshold: 0.95,
+				compare: comparedScore{
+					nsPerOp:           true,
+					allocedBytesPerOp: true,
+				},
 				onlyDegression: false,
 			},
 			want: false,
@@ -143,7 +152,11 @@ Comparison
 						RatioAllocedBytesPerOp: 0.5,
 					},
 				},
-				threshold:      0.4,
+				threshold: 0.4,
+				compare: comparedScore{
+					nsPerOp:           true,
+					allocedBytesPerOp: true,
+				},
 				onlyDegression: true,
 			},
 			want: true,
@@ -174,7 +187,11 @@ Comparison
 						RatioAllocedBytesPerOp: 0.5,
 					},
 				},
-				threshold:      0.6,
+				threshold: 0.6,
+				compare: comparedScore{
+					nsPerOp:           true,
+					allocedBytesPerOp: true,
+				},
 				onlyDegression: true,
 			},
 			want:      false,
@@ -184,7 +201,7 @@ Comparison
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := &bytes.Buffer{}
-			got := showRatio(w, tt.args.results, tt.args.threshold, tt.args.onlyDegression)
+			got := showRatio(w, tt.args.results, tt.args.threshold, tt.args.compare, tt.args.onlyDegression)
 			gotTable := w.String()
 			assert.Equal(t, tt.wantTable, gotTable, tt.name)
 			assert.Equal(t, tt.want, got, tt.name)

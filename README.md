@@ -29,6 +29,7 @@
   - [Show only benchmarks with worse score](#show-only-benchmarks-with-worse-score)
   - [Specify a threshold](#specify-a-threshold)
   - [Specify a base commit compared with HEAD](#specify-a-base-commit-compared-with-head)
+  - [Compare only memory allocation](#compare-only-memory-allocation)
 - [Usage](#usage)
 - [Q&A](#qa)
   - [A result of benchmarks is unstable](#a-result-of-benchmarks-is-unstable)
@@ -172,7 +173,6 @@ Comparison
 +-----------------------------+---------+-------------------+
 
 2020/01/12 17:48:39 This commit makes benchmarks worse
-
 ```
 
 </details>
@@ -192,6 +192,51 @@ By default, `cob` uses `HEAD~1`. If you compare benchmarks with different commit
 $ cob --base origin/master ./...
 ```
 
+## Compare only memory allocation
+You can use `-compare` option.
+
+```
+$ cob -compare B/op
+```
+
+<details>
+<summary>Result</summary>
+
+```
+2020/01/15 14:46:31 Run Benchmark: 4363944cbed3da7a8245cbcdc8d8240b8976eb24 HEAD~1
+2020/01/15 14:46:33 Run Benchmark: 599a5523729d4d99a331b9d3f71dde9e1e6daef0 HEAD
+
+Result
+======
+
++-----------------------------+----------+---------------+-------------------+
+|            Name             |  Commit  |    NsPerOp    | AllocedBytesPerOp |
++-----------------------------+----------+---------------+-------------------+
+| BenchmarkAppend_Allocate-16 |   HEAD   |  179.00 ns/op |      121 B/op     |
++                             +----------+---------------+-------------------+
+|                             | HEAD@{1} |  104.00 ns/op |      23 B/op      |
++-----------------------------+----------+---------------+-------------------+
+|      BenchmarkCall-16       |   HEAD   |   0.50 ns/op  |       0 B/op      |
++                             +----------+---------------+                   +
+|                             | HEAD@{1} |   0.49 ns/op  |                   |
++-----------------------------+----------+---------------+-------------------+
+
+Comparison
+==========
+
++-----------------------------+---------+-------------------+
+|            Name             | NsPerOp | AllocedBytesPerOp |
++-----------------------------+---------+-------------------+
+| BenchmarkAppend_Allocate-16 |    -    |      426.09%      |
++-----------------------------+---------+-------------------+
+|      BenchmarkCall-16       |    -    |       0.00%       |
++-----------------------------+---------+-------------------+
+
+2020/01/15 14:46:35 This commit makes benchmarks worse
+```
+
+</details>
+
 # Usage
 
 ```
@@ -208,6 +253,7 @@ GLOBAL OPTIONS:
    --only-degression   Show only benchmarks with worse score (default: false)
    --threshold value   The program fails if the benchmark gets worse than the threshold (default: 0.2)
    --base value        Specify a base commit compared with HEAD (default: "HEAD~1")
+   --compare value     Which score to compare (default: "ns/op,B/op")
    --bench-cmd value   Specify a command to measure benchmarks (default: "go")
    --bench-args value  Specify arguments passed to -cmd (default: "test -run '^$' -bench . -benchmem ./...")
    --help, -h          show help (default: false)

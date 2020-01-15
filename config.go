@@ -10,6 +10,7 @@ type config struct {
 	onlyDegression bool
 	threshold      float64
 	base           string
+	compare        []string
 	benchCmd       string
 	benchArgs      []string
 }
@@ -19,6 +20,7 @@ func newConfig(c *cli.Context) config {
 		onlyDegression: c.Bool("only-degression"),
 		threshold:      c.Float64("threshold"),
 		base:           c.String("base"),
+		compare:        strings.Split(c.String("compare"), ","),
 		benchCmd:       c.String("bench-cmd"),
 		benchArgs:      strings.Fields(c.String("bench-args")),
 	}
