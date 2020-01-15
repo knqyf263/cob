@@ -24,7 +24,6 @@
   - [Travis CI](#travis-ci)
   - [CircleCI](#circleci)
 - [Example](#example)
-  - [Print memory allocation statistics for benchmarks](#print-memory-allocation-statistics-for-benchmarks)
   - [Run only those benchmarks matching a regular expression](#run-only-those-benchmarks-matching-a-regular-expression)
   - [Show only benchmarks with worse score](#show-only-benchmarks-with-worse-score)
   - [Specify a threshold](#specify-a-threshold)
