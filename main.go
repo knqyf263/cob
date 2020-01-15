@@ -100,7 +100,10 @@ func run(c config) error {
 	if err != nil {
 		return xerrors.Errorf("failed to reset the worktree to a previous commit: %w", err)
 	}
-	defer w.Reset(&git.ResetOptions{Commit: head.Hash(), Mode: git.HardReset})
+
+	defer func() {
+		_ = w.Reset(&git.ResetOptions{Commit: head.Hash(), Mode: git.HardReset})
+	}()
 
 	log.Printf("Run Benchmark: %s %s", prev, c.base)
 	prevSet, err := runBenchmark(c.benchCmd, c.benchArgs)
