@@ -116,7 +116,7 @@ $ cob -bench-cmd make -bench-args bench
 ## Run only those benchmarks matching a regular expression
 
 ```
-$ cob -bench-args "-bench-args "test -bench Append -benchmem ./..."
+$ cob -bench-args "test -bench Append -benchmem ./..."
 ```
 
 <details>
