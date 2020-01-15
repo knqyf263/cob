@@ -174,7 +174,7 @@ func run(c config) error {
 }
 
 func prepareBenchArgs(c config) []string {
-	args := []string{"test", "-benchtime", c.benchtime, "-bench", c.bench}
+	args := []string{"test", "-run='^$'", "-benchtime", c.benchtime, "-bench", c.bench}
 	if c.benchmem {
 		args = append(args, "-benchmem")
 	}
