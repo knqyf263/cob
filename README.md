@@ -61,7 +61,7 @@ jobs:
       run: curl -sfL https://raw.githubusercontent.com/knqyf263/cob/master/install.sh | sudo sh -s -- -b /usr/local/bin
 
     - name: Run Benchmark
-      run: cob -benchmem ./...
+      run: cob
 ```
 
 ## Travis CI
@@ -76,7 +76,7 @@ before_script:
   - curl -sfL https://raw.githubusercontent.com/knqyf263/cob/master/install.sh | sudo sh -s -- -b /usr/local/bin
 
 script:
-  - cob -benchmem ./...
+  - cob
 ```
 
 ## CircleCI
@@ -94,7 +94,7 @@ jobs:
           command: curl -sfL https://raw.githubusercontent.com/knqyf263/cob/master/install.sh | sudo sh -s -- -b /usr/local/bin
       - run:
           name: Run cob
-          command: cob -benchmem ./...
+          command: cob
 workflows:
   version: 2
   build-workflow:
@@ -104,58 +104,25 @@ workflows:
 
 
 # Example
-## Print memory allocation statistics for benchmarks
+
+## Override a command to measure benchmarks
+
+To measure benchmarks by `make bench`, you can use `-bench-cmd` and `-bench-args` options.
 
 ```
-$ cob -benchmem ./...
+$ cob -bench-cmd make -bench-args bench
 ```
-
-<details>
-<summary>Result</summary>
-
-```
-2020/01/12 17:31:16 Run Benchmark: 4363944cbed3da7a8245cbcdc8d8240b8976eb24 HEAD{@1}
-2020/01/12 17:31:19 Run Benchmark: 599a5523729d4d99a331b9d3f71dde9e1e6daef0 HEAD
-
-Result
-======
-
-+-----------------------------+----------+---------------+-------------------+
-|            Name             |  Commit  |    NsPerOp    | AllocedBytesPerOp |
-+-----------------------------+----------+---------------+-------------------+
-| BenchmarkAppend_Allocate-16 |   HEAD   |  175.00 ns/op |      111 B/op     |
-+                             +----------+---------------+-------------------+
-|                             | HEAD@{1} |  108.00 ns/op |      23 B/op      |
-+-----------------------------+----------+---------------+-------------------+
-|      BenchmarkCall-16       |   HEAD   |   0.27 ns/op  |       0 B/op      |
-+                             +----------+---------------+                   +
-|                             | HEAD@{1} |   0.29 ns/op  |                   |
-+-----------------------------+----------+---------------+-------------------+
-
-Comparison
-==========
-
-+-----------------------------+---------+-------------------+
-|            Name             | NsPerOp | AllocedBytesPerOp |
-+-----------------------------+---------+-------------------+
-| BenchmarkAppend_Allocate-16 | 62.04%  |      382.61%      |
-+-----------------------------+---------+-------------------+
-|      BenchmarkCall-16       |  7.53%  |       0.00%       |
-+-----------------------------+---------+-------------------+
-
-2020/01/12 17:31:21 This commit makes benchmarks worse
-```
-
-</details>
-
 
 ## Run only those benchmarks matching a regular expression
 
+```
+$ cob -bench-args "-bench-args "test -bench Append -benchmem ./..."
+```
+
 <details>
 <summary>Result</summary>
 
 ```
-$ cob -bench Append ./...
 2020/01/12 17:32:30 Run Benchmark: 4363944cbed3da7a8245cbcdc8d8240b8976eb24 HEAD{@1}
 2020/01/12 17:32:32 Run Benchmark: 599a5523729d4d99a331b9d3f71dde9e1e6daef0 HEAD
 
@@ -185,7 +152,7 @@ Comparison
 ## Show only benchmarks with worse score
 
 ```
-$ cob -benchmem -only-degression
+$ cob -only-degression
 ```
 
 <details>
@@ -228,7 +195,6 @@ $ cob --base origin/master ./...
 # Usage
 
 ```
-$ cob -h
 NAME:
    cob - Continuous Benchmark for Go project
 
@@ -239,13 +205,12 @@ COMMANDS:
    help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --only-degression  Show only benchmarks with worse score (default: false)
-   --threshold value  The program fails if the benchmark gets worse than the threshold (default: 0.1)
-   --bench value      Run only those benchmarks matching a regular expression. (default: ".")
-   --benchmem         Print memory allocation statistics for benchmarks. (default: false)
-   --benchtime value  Run enough iterations of each benchmark to take t, specified as a time.Duration (for example, -benchtime 1h30s). (default: "1s")
-   --help, -h         show help (default: false)
-
+   --only-degression   Show only benchmarks with worse score (default: false)
+   --threshold value   The program fails if the benchmark gets worse than the threshold (default: 0.2)
+   --base value        Specify a base commit compared with HEAD (default: "HEAD~1")
+   --bench-cmd value   Specify a command to measure benchmarks (default: "go")
+   --bench-args value  Specify arguments passed to -cmd (default: "test -run '^$' -bench . -benchmem ./...")
+   --help, -h          show help (default: false)
 ```
 
 # Q&A
@@ -255,16 +220,16 @@ GLOBAL OPTIONS:
 Specify a package name.
 
 ```
-$ cob -benchmem ./foo
-$ cob -benchmem ./bar
+$ cob -bench-args "test -bench . -benchmem ./foo" 
+$ cob -bench-args "test -bench . -benchmem ./bar" 
 ```
 
 ## A result of benchmarks is unstable
 
-You can specify `--benchtime`.
+You can specify `-benchtime`.
 
 ```
-$ cob -benchtime 10s ./...
+$ cob -bench-args "test -bench . -benchmem -benchtime 10s ./..." 
 ```
 
 # License

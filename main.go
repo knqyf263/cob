@@ -48,22 +48,14 @@ func main() {
 				Value: "HEAD~1",
 			},
 			&cli.StringFlag{
-				Name:  "bench",
-				Usage: "Run only those benchmarks matching a regular expression.",
-				Value: ".",
-			},
-			&cli.BoolFlag{
-				Name:  "benchmem",
-				Usage: "Print memory allocation statistics for benchmarks.",
+				Name:  "bench-cmd",
+				Usage: "Specify a command to measure benchmarks",
+				Value: "go",
 			},
 			&cli.StringFlag{
-				Name:  "benchtime",
-				Usage: "Run enough iterations of each benchmark to take t, specified as a time.Duration (for example, -benchtime 1h30s).",
-				Value: "1s",
-			},
-			&cli.StringFlag{
-				Name:  "tags",
-				Usage: "Run only those benchmarks with the specified build tags.",
+				Name:  "bench-args",
+				Usage: "Specify arguments passed to -cmd",
+				Value: "test -run '^$' -bench . -benchmem ./...",
 			},
 		},
 	}
@@ -108,11 +100,10 @@ func run(c config) error {
 	if err != nil {
 		return xerrors.Errorf("failed to reset the worktree to a previous commit: %w", err)
 	}
-
-	args := prepareBenchArgs(c)
+	defer w.Reset(&git.ResetOptions{Commit: head.Hash(), Mode: git.HardReset})
 
 	log.Printf("Run Benchmark: %s %s", prev, c.base)
-	prevSet, err := runBenchmark(args)
+	prevSet, err := runBenchmark(c.benchCmd, c.benchArgs)
 	if err != nil {
 		return xerrors.Errorf("failed to run a benchmark: %w", err)
 	}
@@ -123,7 +114,7 @@ func run(c config) error {
 	}
 
 	log.Printf("Run Benchmark: %s %s", head.Hash(), "HEAD")
-	headSet, err := runBenchmark(args)
+	headSet, err := runBenchmark(c.benchCmd, c.benchArgs)
 	if err != nil {
 		return xerrors.Errorf("failed to run a benchmark: %w", err)
 	}
@@ -151,8 +142,8 @@ func run(c config) error {
 			ratioAllocedBytesPerOp = (float64(headBench.AllocedBytesPerOp) - float64(prevBench.AllocedBytesPerOp)) / float64(prevBench.AllocedBytesPerOp)
 		}
 
-		rows = append(rows, generateRow("HEAD", headBench, c.benchmem))
-		rows = append(rows, generateRow("HEAD@{1}", prevBench, c.benchmem))
+		rows = append(rows, generateRow("HEAD", headBench))
+		rows = append(rows, generateRow("HEAD@{1}", prevBench))
 
 		ratios = append(ratios, result{
 			Name:                   benchName,
@@ -162,10 +153,10 @@ func run(c config) error {
 	}
 
 	if !c.onlyDegression {
-		showResult(os.Stdout, rows, c.benchmem)
+		showResult(os.Stdout, rows)
 	}
 
-	degression := showRatio(os.Stdout, ratios, c.benchmem, c.threshold, c.onlyDegression)
+	degression := showRatio(os.Stdout, ratios, c.threshold, c.onlyDegression)
 	if degression {
 		return xerrors.New("This commit makes benchmarks worse")
 	}
@@ -173,22 +164,10 @@ func run(c config) error {
 	return nil
 }
 
-func prepareBenchArgs(c config) []string {
-	args := []string{"test", "-run='^$'", "-benchtime", c.benchtime, "-bench", c.bench}
-	if c.benchmem {
-		args = append(args, "-benchmem")
-	}
-	if c.tags != "" {
-		args = append(args, "-tags", c.tags)
-	}
-	args = append(args, c.args...)
-	return args
-}
-
-func runBenchmark(args []string) (parse.Set, error) {
-	out, err := exec.Command("go", args...).Output()
+func runBenchmark(cmd string, args []string) (parse.Set, error) {
+	out, err := exec.Command(cmd, args...).Output()
 	if err != nil {
-		return nil, xerrors.Errorf("failed to run 'go test' command: %w", err)
+		return nil, xerrors.Errorf("failed to run '%s %s' command: %w", cmd, strings.Join(args, " "), err)
 	}
 
 	b := bytes.NewBuffer(out)
@@ -199,25 +178,19 @@ func runBenchmark(args []string) (parse.Set, error) {
 	return s, nil
 }
 
-func generateRow(ref string, b *parse.Benchmark, benchmem bool) []string {
-	row := []string{b.Name, ref, fmt.Sprintf(" %.2f ns/op", b.NsPerOp)}
-	if benchmem {
-		row = append(row, fmt.Sprintf(" %d B/op", b.AllocedBytesPerOp))
-	}
-	return row
+func generateRow(ref string, b *parse.Benchmark) []string {
+	return []string{b.Name, ref, fmt.Sprintf(" %.2f ns/op", b.NsPerOp),
+		fmt.Sprintf(" %d B/op", b.AllocedBytesPerOp)}
 }
 
-func showResult(w io.Writer, rows [][]string, benchmem bool) {
+func showResult(w io.Writer, rows [][]string) {
 	fmt.Fprintln(w, "\nResult")
 	fmt.Fprintf(w, "%s\n\n", strings.Repeat("=", 6))
 
 	table := tablewriter.NewWriter(w)
 	table.SetAutoFormatHeaders(false)
 	table.SetAlignment(tablewriter.ALIGN_CENTER)
-	headers := []string{"Name", "Commit", "NsPerOp"}
-	if benchmem {
-		headers = append(headers, "AllocedBytesPerOp")
-	}
+	headers := []string{"Name", "Commit", "NsPerOp", "AllocedBytesPerOp"}
 	table.SetHeader(headers)
 	table.SetAutoMergeCells(true)
 	table.SetRowLine(true)
@@ -225,15 +198,12 @@ func showResult(w io.Writer, rows [][]string, benchmem bool) {
 	table.Render()
 }
 
-func showRatio(w io.Writer, results []result, benchmem bool, threshold float64, onlyDegression bool) bool {
+func showRatio(w io.Writer, results []result, threshold float64, onlyDegression bool) bool {
 	table := tablewriter.NewWriter(w)
 	table.SetAutoFormatHeaders(false)
 	table.SetAlignment(tablewriter.ALIGN_CENTER)
 	table.SetRowLine(true)
-	headers := []string{"Name", "NsPerOp"}
-	if benchmem {
-		headers = append(headers, "AllocedBytesPerOp")
-	}
+	headers := []string{"Name", "NsPerOp", "AllocedBytesPerOp"}
 	table.SetHeader(headers)
 
 	var degression bool
@@ -245,11 +215,7 @@ func showRatio(w io.Writer, results []result, benchmem bool, threshold float64, 
 				continue
 			}
 		}
-		row := []string{result.Name, generateRatioItem(result.RatioNsPerOp)}
-		if benchmem {
-			row = append(row, generateRatioItem(result.RatioAllocedBytesPerOp))
-		}
-
+		row := []string{result.Name, generateRatioItem(result.RatioNsPerOp), generateRatioItem(result.RatioAllocedBytesPerOp)}
 		colors := []tablewriter.Colors{{}}
 		colors = append(colors, generateColor(result.RatioNsPerOp))
 		colors = append(colors, generateColor(result.RatioAllocedBytesPerOp))
