@@ -1,27 +1,25 @@
 package main
 
-import "github.com/urfave/cli/v2"
+import (
+	"strings"
+
+	"github.com/urfave/cli/v2"
+)
 
 type config struct {
-	args           []string
 	onlyDegression bool
 	threshold      float64
 	base           string
-	bench          string
-	benchmem       bool
-	benchtime      string
-	tags           string
+	benchCmd       string
+	benchArgs      []string
 }
 
 func newConfig(c *cli.Context) config {
 	return config{
-		args:           c.Args().Slice(),
 		onlyDegression: c.Bool("only-degression"),
 		threshold:      c.Float64("threshold"),
 		base:           c.String("base"),
-		bench:          c.String("bench"),
-		benchmem:       c.Bool("benchmem"),
-		benchtime:      c.String("benchtime"),
-		tags:           c.String("tags"),
+		benchCmd:       c.String("bench-cmd"),
+		benchArgs:      strings.Fields(c.String("bench-args")),
 	}
 }

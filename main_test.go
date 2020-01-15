@@ -22,33 +22,6 @@ func Test_showResult(t *testing.T) {
 			name: "happy path",
 			args: args{
 				rows: [][]string{
-					{"BenchmarkA", "HEAD", "123 ns/op"},
-					{"BenchmarkA", "HEAD{@1}", "133 ns/op"},
-					{"BenchmarkB", "HEAD", "5 ns/op"},
-					{"BenchmarkB", "HEAD{@1}", "9 ns/op"},
-				},
-			},
-			wantTable: `
-Result
-======
-
-+------------+----------+-----------+
-|    Name    |  Commit  |  NsPerOp  |
-+------------+----------+-----------+
-| BenchmarkA |   HEAD   | 123 ns/op |
-+            +----------+-----------+
-|            | HEAD{@1} | 133 ns/op |
-+------------+----------+-----------+
-| BenchmarkB |   HEAD   |  5 ns/op  |
-+            +----------+-----------+
-|            | HEAD{@1} |  9 ns/op  |
-+------------+----------+-----------+
-`,
-		},
-		{
-			name: "with benchmem",
-			args: args{
-				rows: [][]string{
 					{"BenchmarkA", "HEAD", "123 ns/op", "234 B/op"},
 					{"BenchmarkA", "HEAD{@1}", "133 ns/op", "255 B/op"},
 					{"BenchmarkB", "HEAD", "5 ns/op", "7 B/op"},
@@ -77,7 +50,7 @@ Result
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := &bytes.Buffer{}
-			showResult(w, tt.args.rows, tt.args.benchmem)
+			showResult(w, tt.args.rows)
 			gotTable := w.String()
 			assert.Equal(t, tt.wantTable, gotTable, tt.name)
 		})
@@ -87,7 +60,6 @@ Result
 func Test_showRatio(t *testing.T) {
 	type args struct {
 		results        []result
-		benchmem       bool
 		threshold      float64
 		onlyDegression bool
 	}
@@ -102,38 +74,11 @@ func Test_showRatio(t *testing.T) {
 			args: args{
 				results: []result{
 					{
-						Name:         "BenchmarkA",
-						RatioNsPerOp: 0.01,
-					},
-				},
-				benchmem:       false,
-				threshold:      0.2,
-				onlyDegression: false,
-			},
-			want: false,
-			wantTable: fmt.Sprintf(`
-Comparison
-==========
-
-+------------+---------+
-|    Name    | NsPerOp |
-+------------+---------+
-| BenchmarkA |  %s  |
-+------------+---------+
-
-`, "\x1b[1;91m1.00%\x1b[0m"),
-		},
-		{
-			name: "with benchmem",
-			args: args{
-				results: []result{
-					{
 						Name:                   "BenchmarkA",
 						RatioNsPerOp:           0.01,
 						RatioAllocedBytesPerOp: 0.5,
 					},
 				},
-				benchmem:       true,
 				threshold:      0.2,
 				onlyDegression: false,
 			},
@@ -165,7 +110,6 @@ Comparison
 						RatioAllocedBytesPerOp: 0.5,
 					},
 				},
-				benchmem:       true,
 				threshold:      0.95,
 				onlyDegression: false,
 			},
@@ -199,7 +143,6 @@ Comparison
 						RatioAllocedBytesPerOp: 0.5,
 					},
 				},
-				benchmem:       true,
 				threshold:      0.4,
 				onlyDegression: true,
 			},
@@ -231,7 +174,6 @@ Comparison
 						RatioAllocedBytesPerOp: 0.5,
 					},
 				},
-				benchmem:       false,
 				threshold:      0.6,
 				onlyDegression: true,
 			},
@@ -242,7 +184,7 @@ Comparison
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := &bytes.Buffer{}
-			got := showRatio(w, tt.args.results, tt.args.benchmem, tt.args.threshold, tt.args.onlyDegression)
+			got := showRatio(w, tt.args.results, tt.args.threshold, tt.args.onlyDegression)
 			gotTable := w.String()
 			assert.Equal(t, tt.wantTable, gotTable, tt.name)
 			assert.Equal(t, tt.want, got, tt.name)
