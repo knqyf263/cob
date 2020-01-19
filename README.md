@@ -57,7 +57,7 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v1
 
-    - name: Install GolangCI-Lint
+    - name: Install cob
       run: curl -sfL https://raw.githubusercontent.com/knqyf263/cob/master/install.sh | sudo sh -s -- -b /usr/local/bin
 
     - name: Run Benchmark
