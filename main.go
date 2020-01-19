@@ -135,15 +135,23 @@ func run(c config) error {
 	var ratios []result
 	var rows [][]string
 	for benchName, headBenchmarks := range headSet {
+		var prevBench, headBench *parse.Benchmark
+
+		if len(headBenchmarks) > 0 {
+			headBench = headBenchmarks[0]
+		}
+		rows = append(rows, generateRow("HEAD", headBench))
+
 		prevBenchmarks, ok := prevSet[benchName]
 		if !ok {
+			rows = append(rows, []string{benchName, c.base, "-", "-"})
 			continue
 		}
-		if len(headBenchmarks) == 0 || len(prevBenchmarks) == 0 {
-			continue
+
+		if len(prevBenchmarks) > 0 {
+			prevBench = prevBenchmarks[0]
 		}
-		prevBench := prevBenchmarks[0]
-		headBench := headBenchmarks[0]
+		rows = append(rows, generateRow(c.base, prevBench))
 
 		var ratioNsPerOp float64
 		if prevBench.NsPerOp != 0 {
@@ -154,9 +162,6 @@ func run(c config) error {
 		if prevBench.AllocedBytesPerOp != 0 {
 			ratioAllocedBytesPerOp = (float64(headBench.AllocedBytesPerOp) - float64(prevBench.AllocedBytesPerOp)) / float64(prevBench.AllocedBytesPerOp)
 		}
-
-		rows = append(rows, generateRow("HEAD", headBench))
-		rows = append(rows, generateRow("HEAD@{1}", prevBench))
 
 		ratios = append(ratios, result{
 			Name:                   benchName,
@@ -177,9 +182,17 @@ func run(c config) error {
 	return nil
 }
 
-func runBenchmark(cmd string, args []string) (parse.Set, error) {
-	out, err := exec.Command(cmd, args...).Output()
+func runBenchmark(cmdStr string, args []string) (parse.Set, error) {
+	var stderr bytes.Buffer
+	cmd := exec.Command(cmdStr, args...)
+	cmd.Stderr = &stderr
+
+	out, err := cmd.Output()
 	if err != nil {
+		if strings.HasSuffix(strings.TrimSpace(stderr.String()), "no packages to test") {
+			return parse.Set{}, nil
+		}
+		log.Println(stderr.String())
 		return nil, xerrors.Errorf("failed to run '%s %s' command: %w", cmd, strings.Join(args, " "), err)
 	}
 
@@ -274,10 +287,8 @@ func whichScoreToCompare(c []string) comparedScore {
 	for _, cc := range c {
 		switch cc {
 		case "ns/op":
-			fmt.Println("cpu")
 			comparedScore.nsPerOp = true
 		case "B/op":
-			fmt.Println("memory")
 			comparedScore.allocedBytesPerOp = true
 		}
 	}
