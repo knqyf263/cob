@@ -192,8 +192,9 @@ func runBenchmark(cmdStr string, args []string) (parse.Set, error) {
 		if strings.HasSuffix(strings.TrimSpace(stderr.String()), "no packages to test") {
 			return parse.Set{}, nil
 		}
+		log.Println(string(out))
 		log.Println(stderr.String())
-		return nil, xerrors.Errorf("failed to run '%s %s' command: %w", cmd, strings.Join(args, " "), err)
+		return nil, xerrors.Errorf("failed to run '%s' command: %w", cmd, err)
 	}
 
 	b := bytes.NewBuffer(out)
