@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"io"
@@ -116,7 +117,7 @@ func run(c config) error {
 	}()
 
 	log.Printf("Run Benchmark: %s %s", prev, c.base)
-	prevSet, err := runBenchmark(c.benchCmd, c.benchArgs)
+	prevSet, err := runPreviousBenchmark(c.benchCmd, c.benchArgs)
 	if err != nil {
 		return xerrors.Errorf("failed to run a benchmark: %w", err)
 	}
@@ -184,6 +185,7 @@ func run(c config) error {
 
 func runBenchmark(cmdStr string, args []string) (parse.Set, error) {
 	var stderr bytes.Buffer
+	fmt.Printf("%s %#v\n", cmdStr, args)
 	cmd := exec.Command(cmdStr, args...)
 	cmd.Stderr = &stderr
 
@@ -197,12 +199,56 @@ func runBenchmark(cmdStr string, args []string) (parse.Set, error) {
 		return nil, xerrors.Errorf("failed to run '%s' command: %w", cmd, err)
 	}
 
-	b := bytes.NewBuffer(out)
-	s, err := parse.ParseSet(b)
-	if err != nil {
-		return nil, xerrors.Errorf("failed to parse a result of benchmarks: %w", err)
+	r := bytes.NewReader(out)
+	scan := bufio.NewScanner(r)
+	ord := 0
+
+	line := ""
+	bb := make(parse.Set)
+	for scan.Scan() {
+		t := scan.Text()
+
+		if b, err := parse.ParseLine(t); err == nil {
+			b.Ord = ord
+			ord++
+			bb[b.Name] = append(bb[b.Name], b)
+			continue
+		}
+
+		tt := strings.TrimSpace(t)
+		ll := strings.HasPrefix(tt, "Benchmark")
+		if ll {
+			f := strings.Split(tt, " ")
+			if len(f) > 0 {
+				line = f[0]
+			}
+		}
+
+		if b, err := parse.ParseLine(line + " " + t); err == nil {
+			b.Ord = ord
+			ord++
+			bb[b.Name] = append(bb[b.Name], b)
+			continue
+		}
 	}
+
+	s := bb
+
+	// b := bytes.NewBuffer(out)
+	// s, err := parse.ParseSet(b)
+	// if err != nil {
+	// 	return nil, xerrors.Errorf("failed to parse a result of benchmarks: %w", err)
+	// }
 	return s, nil
+}
+
+func runPreviousBenchmark(cmdStr string, args []string) (parse.Set, error) {
+	prevSet, err := runBenchmark(cmdStr, args)
+	if err != nil && strings.Contains(err.Error(), "exit status 1") {
+		log.Printf("previous benchmark failed: %s\n", err.Error())
+		return parse.Set{}, nil
+	}
+	return prevSet, err
 }
 
 func generateRow(ref string, b *parse.Benchmark) []string {
