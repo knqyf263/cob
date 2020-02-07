@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"io"
@@ -116,7 +117,7 @@ func run(c config) error {
 	}()
 
 	log.Printf("Run Benchmark: %s %s", prev, c.base)
-	prevSet, err := runBenchmark(c.benchCmd, c.benchArgs)
+	prevSet, err := runPreviousBenchmark(c.benchCmd, c.benchArgs)
 	if err != nil {
 		return xerrors.Errorf("failed to run a benchmark: %w", err)
 	}
@@ -197,12 +198,62 @@ func runBenchmark(cmdStr string, args []string) (parse.Set, error) {
 		return nil, xerrors.Errorf("failed to run '%s' command: %w", cmd, err)
 	}
 
-	b := bytes.NewBuffer(out)
-	s, err := parse.ParseSet(b)
+	s, err := parseBenchmark(out)
 	if err != nil {
 		return nil, xerrors.Errorf("failed to parse a result of benchmarks: %w", err)
 	}
 	return s, nil
+}
+
+func runPreviousBenchmark(cmdStr string, args []string) (parse.Set, error) {
+	prevSet, err := runBenchmark(cmdStr, args)
+	if err != nil && strings.Contains(err.Error(), "exit status 1") {
+		log.Printf("previous benchmark failed: %s\n", err.Error())
+		return parse.Set{}, nil
+	}
+	return prevSet, err
+}
+
+func parseBenchmark(data []byte) (parse.Set, error) {
+	r := bytes.NewReader(data)
+	scan := bufio.NewScanner(r)
+	ord := 0
+
+	benchmarkName := ""
+	bb := make(parse.Set)
+	for scan.Scan() {
+		t := scan.Text()
+
+		if ok := parseLine(bb, t, ord); ok {
+			ord++
+			continue
+		}
+
+		containBenchmark := strings.HasPrefix(t, "Benchmark")
+		if containBenchmark {
+			benchmarkName = strings.Split(t, " ")[0]
+			continue
+		}
+
+		if ok := parseLine(bb, fmt.Sprintf("%s %s", benchmarkName, t), ord); ok {
+			ord++
+		}
+	}
+
+	if err := scan.Err(); err != nil {
+		return nil, err
+	}
+
+	return bb, nil
+}
+
+func parseLine(bb parse.Set, line string, ord int) bool {
+	if b, err := parse.ParseLine(line); err == nil {
+		b.Ord = ord
+		bb[b.Name] = append(bb[b.Name], b)
+		return true
+	}
+	return false
 }
 
 func generateRow(ref string, b *parse.Benchmark) []string {
