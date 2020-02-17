@@ -207,7 +207,7 @@ func runBenchmark(cmdStr string, args []string) (parse.Set, error) {
 
 func runPreviousBenchmark(cmdStr string, args []string) (parse.Set, error) {
 	prevSet, err := runBenchmark(cmdStr, args)
-	if err != nil && strings.Contains(err.Error(), "exit status 1") {
+	if err != nil && strings.Contains(err.Error(), "exit status ") {
 		log.Printf("previous benchmark failed: %s\n", err.Error())
 		return parse.Set{}, nil
 	}
