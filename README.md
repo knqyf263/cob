@@ -236,6 +236,17 @@ Comparison
 
 </details>
 
+## Skip running cob
+If your commit message contains `[skip cob]`, cob is skipped.
+
+```
+$ git add README.md
+$ git commit -m "[skip cob] update README.md"
+$ cob
+2020/04/19 12:46:57 [skip cob] is detected, so the benchmark is skipped
+```
+
+
 # Usage
 
 ```
