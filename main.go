@@ -9,14 +9,13 @@ import (
 	"os/exec"
 	"strings"
 
-	"gopkg.in/src-d/go-git.v4/plumbing"
-
 	"golang.org/x/xerrors"
+	git "gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4/plumbing"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/tools/benchmark/parse"
-	"gopkg.in/src-d/go-git.v4"
 )
 
 type result struct {
@@ -85,6 +84,16 @@ func run(c config) error {
 	head, err := r.Head()
 	if err != nil {
 		return xerrors.Errorf("unable to get the reference where HEAD is pointing to: %w", err)
+	}
+
+	commit, err := r.CommitObject(head.Hash())
+	if err != nil {
+		return xerrors.Errorf("unable to get the head commit: %w", err)
+	}
+
+	if strings.Contains(strings.ToLower(commit.Message), "[skip cob]") {
+		log.Println("[skip cob] is detected, so the benchmark is skipped")
+		return nil
 	}
 
 	prev, err := r.ResolveRevision(plumbing.Revision(c.base))
