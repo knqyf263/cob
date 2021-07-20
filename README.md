@@ -1,11 +1,17 @@
 <img src="img/logo.png" width="350">
 
-[![GitHub release](https://img.shields.io/github/release/knqyf263/cob.svg)](https://github.com/knqyf263/cob/releases/latest)
-![](https://github.com/knqyf263/cob/workflows/Go/badge.svg)
-[![Go Report Card](https://goreportcard.com/badge/github.com/knqyf263/cob)](https://goreportcard.com/report/github.com/knqyf263/cob)
-[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/knqyf263/cob/blob/master/LICENSE)
+[![GitHub release](https://img.shields.io/github/release/szuecs/cob.svg)](https://github.com/szuecs/cob/releases/latest)
+![](https://github.com/szuecs/cob/workflows/Go/badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/szuecs/cob)](https://goreportcard.com/report/github.com/szuecs/cob)
+[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/szuecs/cob/blob/master/LICENSE)
 
+# Forked repository
 
+Why fork and not fix the original?
+https://github.com/knqyf263/cob/issues/21 is more than one year old without any
+response and I have the same issue. I don't want to wait. I take my freedom to
+fork and fix the project for me, feel free to create PRs and issues, but I am
+not sure if I will maintain this for very long.
 
 # Abstract
 `cob` compares benchmarks between the latest commit (HEAD) and the previous commit (HEAD{@1}). The program will fail if the change in score is worse than the threshold. This tools is suitable for CI/CD to detect a regression of a performance automatically.
@@ -35,7 +41,7 @@
 
 # Continuous Integration (CI)
 
-See [cob-example](https://github.com/knqyf263/cob-example) for details.
+See [cob-example](https://github.com/szuecs/cob-example) for details.
 
 ## GitHub Actions
 
@@ -58,7 +64,7 @@ jobs:
       uses: actions/checkout@v1
 
     - name: Install cob
-      run: curl -sfL https://raw.githubusercontent.com/knqyf263/cob/master/install.sh | sudo sh -s -- -b /usr/local/bin
+      run: curl -sfL https://raw.githubusercontent.com/szuecs/cob/master/install.sh | sudo sh -s -- -b /usr/local/bin
 
     - name: Run Benchmark
       run: cob
@@ -73,7 +79,7 @@ go:
   - 1.13.x
 
 before_script:
-  - curl -sfL https://raw.githubusercontent.com/knqyf263/cob/master/install.sh | sudo sh -s -- -b /usr/local/bin
+  - curl -sfL https://raw.githubusercontent.com/szuecs/cob/master/install.sh | sudo sh -s -- -b /usr/local/bin
 
 script:
   - cob
@@ -91,7 +97,7 @@ jobs:
       - checkout
       - run:
           name: Install cob
-          command: curl -sfL https://raw.githubusercontent.com/knqyf263/cob/master/install.sh | sudo sh -s -- -b /usr/local/bin
+          command: curl -sfL https://raw.githubusercontent.com/szuecs/cob/master/install.sh | sudo sh -s -- -b /usr/local/bin
       - run:
           name: Run cob
           command: cob
@@ -290,8 +296,8 @@ $ cob -bench-args "test -bench . -benchmem -benchtime 10s ./..."
 
 # License
 
-This repository is available under the [MIT](https://github.com/knqyf263/cob/blob/master/LICENSE)
+This repository is available under the [MIT](https://github.com/szuecs/cob/blob/master/LICENSE)
 
 # Author
 
-[Teppei Fukuda](https://github.com/knqyf263) (knqyf263)
+[Teppei Fukuda](https://github.com/szuecs) (szuecs)

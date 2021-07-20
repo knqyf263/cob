@@ -32,10 +32,10 @@ nfpms:
       - rpm
     dependencies:
       - rpm
-    vendor: "knqyf263"
-    homepage: "https://github.com/knqyf263"
-    maintainer: "Teppei Fukuda <knqyf263@gmail.com>"
-    description: "Continuous Benchmark for Go Project"
+    vendor: "szuecs"
+    homepage: "https://github.com/szuecs"
+    maintainer: "nobody"
+    description: "Continuous Benchmark for Go Project - fork because of https://github.com/knqyf263/cob/issues/21"
     license: "MIT"
     file_name_template: "{{.ProjectName}}_{{.Version}}_{{.Os}}-{{.Arch}}"
     replacements:
