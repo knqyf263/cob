@@ -66,6 +66,11 @@ func main() {
 				Usage: "Specify arguments passed to -cmd",
 				Value: "test -run '^$' -bench . -benchmem ./...",
 			},
+			&cli.StringFlag{
+				Name:  "git-path",
+				Usage: "Specify the path of the git repo",
+				Value: ".",
+			},
 		},
 	}
 
@@ -76,7 +81,7 @@ func main() {
 }
 
 func run(c config) error {
-	r, err := git.PlainOpen(".")
+	r, err := git.PlainOpen(c.gitPath)
 	if err != nil {
 		return xerrors.Errorf("unable to open the git repository: %w", err)
 	}
