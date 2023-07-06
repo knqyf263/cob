@@ -13,6 +13,7 @@ type config struct {
 	compare        []string
 	benchCmd       string
 	benchArgs      []string
+	gitPath        string
 }
 
 func newConfig(c *cli.Context) config {
@@ -23,5 +24,6 @@ func newConfig(c *cli.Context) config {
 		compare:        strings.Split(c.String("compare"), ","),
 		benchCmd:       c.String("bench-cmd"),
 		benchArgs:      strings.Fields(c.String("bench-args")),
+		gitPath:        c.String("git-path"),
 	}
 }
