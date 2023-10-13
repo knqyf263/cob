@@ -17,5 +17,9 @@ jobs:
         fetch-depth: 1
     - name: run GoReleaser
       uses: goreleaser/goreleaser-action@v5
+      with:
+        distribution: goreleaser
+        version: v1.21.2
+        args: release --clean
       env:
         GITHUB_TOKEN: ${{ secrets.github_token }}
