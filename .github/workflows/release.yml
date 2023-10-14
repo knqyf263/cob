@@ -16,6 +16,6 @@ jobs:
       with:
         fetch-depth: 1
     - name: run GoReleaser
-      uses: goreleaser/goreleaser-action@v1
+      uses: goreleaser/goreleaser-action@v5
       env:
         GITHUB_TOKEN: ${{ secrets.github_token }}
