@@ -3,7 +3,7 @@ module github.com/knqyf263/cob
 go 1.13
 
 require (
-	github.com/olekukonko/tablewriter v0.0.4
+	github.com/olekukonko/tablewriter v0.0.5
 	github.com/stretchr/testify v1.3.0
 	github.com/urfave/cli/v2 v2.1.1
 	golang.org/x/sys v0.0.0-20200413165638-669c56c373c4 // indirect
