@@ -41,6 +41,10 @@ func main() {
 				Name:  "only-degression",
 				Usage: "Show only benchmarks with worse score",
 			},
+			&cli.BoolFlag{
+				Name:  "fail-without-results",
+				Usage: "Exit with an error if the parsing fails",
+			},
 			&cli.Float64Flag{
 				Name:  "threshold",
 				Usage: "The program fails if the benchmark gets worse than the threshold",
@@ -144,6 +148,15 @@ func run(c config) error {
 	headSet, err := runBenchmark(c.benchCmd, c.benchArgs)
 	if err != nil {
 		return xerrors.Errorf("failed to run a benchmark: %w", err)
+	}
+
+	if c.failWithoutResults {
+		if len(prevSet) == 0 {
+			return xerrors.New("could not parse any benchmark results for the previous commit")
+		}
+		if len(headSet) == 0 {
+			return xerrors.New("could not parse any benchmark results for the current commit")
+		}
 	}
 
 	var ratios []result
