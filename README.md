@@ -2,6 +2,7 @@
 
 [![GitHub release](https://img.shields.io/github/release/knqyf263/cob.svg)](https://github.com/knqyf263/cob/releases/latest)
 ![](https://github.com/knqyf263/cob/workflows/Go/badge.svg)
+[![go-recipes](https://raw.githubusercontent.com/nikolaydubina/go-recipes/main/badge.svg?raw=true)](https://github.com/nikolaydubina/go-recipes)
 [![Go Report Card](https://goreportcard.com/badge/github.com/knqyf263/cob)](https://goreportcard.com/report/github.com/knqyf263/cob)
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/knqyf263/cob/blob/master/LICENSE)
 
