@@ -1,4 +1,4 @@
-FROM golang:1.21 AS binary
+FROM golang:1.22 AS binary
 
 WORKDIR /src
 
