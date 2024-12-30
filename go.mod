@@ -1,13 +1,14 @@
 module github.com/knqyf263/cob
 
 go 1.22
+toolchain go1.22.5
 
 require (
 	github.com/go-git/go-git/v5 v5.13.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.5
-	golang.org/x/tools v0.24.0
+	golang.org/x/tools v0.28.0
 	golang.org/x/xerrors v0.0.0-20240716161551-93cc26a95ae9
 )
 
