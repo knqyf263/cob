@@ -5,7 +5,7 @@ go 1.22
 require (
 	github.com/go-git/go-git/v5 v5.13.2
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/stretchr/testify v1.11.0
+	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v2 v2.27.7
 	golang.org/x/tools v0.24.0
 	golang.org/x/xerrors v0.0.0-20240716161551-93cc26a95ae9
