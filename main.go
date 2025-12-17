@@ -45,6 +45,10 @@ func main() {
 				Name:  "fail-without-results",
 				Usage: "Exit with an error if the parsing fails",
 			},
+			&cli.BoolFlag{
+				Name:  "overwrite-changes",
+				Usage: "Overwrite uncommitted changes in the git repository",
+			},
 			&cli.Float64Flag{
 				Name:  "threshold",
 				Usage: "The program fails if the benchmark gets worse than the threshold",
@@ -120,7 +124,7 @@ func run(c config) error {
 		return xerrors.Errorf("unable to get the working tree status: %w", err)
 	}
 
-	if !s.IsClean() {
+	if !c.overwriteChanges && !s.IsClean() {
 		return xerrors.New("the repository is dirty: commit all changes before running 'cob'")
 	}
 
