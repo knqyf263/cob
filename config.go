@@ -9,6 +9,7 @@ import (
 type config struct {
 	onlyDegression     bool
 	failWithoutResults bool
+	overwriteChanges   bool
 	threshold          float64
 	base               string
 	compare            []string
@@ -21,6 +22,7 @@ func newConfig(c *cli.Context) config {
 	return config{
 		onlyDegression:     c.Bool("only-degression"),
 		failWithoutResults: c.Bool("fail-without-results"),
+		overwriteChanges:   c.Bool("overwrite-changes"),
 		threshold:          c.Float64("threshold"),
 		base:               c.String("base"),
 		compare:            strings.Split(c.String("compare"), ","),

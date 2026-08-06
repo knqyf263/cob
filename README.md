@@ -254,19 +254,22 @@ NAME:
    cob - Continuous Benchmark for Go project
 
 USAGE:
-   cob [global options] command [command options] [arguments...]
+   cob [global options] command [command options]
 
 COMMANDS:
    help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --only-degression   Show only benchmarks with worse score (default: false)
-   --threshold value   The program fails if the benchmark gets worse than the threshold (default: 0.2)
-   --base value        Specify a base commit compared with HEAD (default: "HEAD~1")
-   --compare value     Which score to compare (default: "ns/op,B/op")
-   --bench-cmd value   Specify a command to measure benchmarks (default: "go")
-   --bench-args value  Specify arguments passed to -cmd (default: "test -run '^$' -bench . -benchmem ./...")
-   --help, -h          show help (default: false)
+   --only-degression       Show only benchmarks with worse score (default: false)
+   --fail-without-results  Exit with an error if the parsing fails (default: false)
+   --overwrite-changes     Overwrite uncommitted changes in the git repository (default: false)
+   --threshold value       The program fails if the benchmark gets worse than the threshold (default: 0.2)
+   --base value            Specify a base commit compared with HEAD (default: "HEAD~1")
+   --compare value         Which score to compare (default: "ns/op,B/op")
+   --bench-cmd value       Specify a command to measure benchmarks (default: "go")
+   --bench-args value      Specify arguments passed to -cmd (default: "test -run '^$' -bench . -benchmem ./...")
+   --git-path value        Specify the path of the git repo (default: ".")
+   --help, -h              show help
 ```
 
 # Q&A
