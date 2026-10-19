@@ -9,7 +9,7 @@ workflows:
     '.github/workflows/golangci-lint.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-go@v7.0.0'
-        - 'golangci/golangci-lint-action@v6.5.2'
+        - 'golangci/golangci-lint-action@v9.3.0'
     '.github/workflows/release.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-go@v7.0.0'
@@ -37,9 +37,9 @@ dependencies:
         commit: 'sha1-8d2750c68a42422c14e847fe6c8ac0403b4cbd6f'
         owner_id: 5429470
         repo_id: 288485773
-    'golangci/golangci-lint-action@v6.5.2':
-        ref: 'v6.5.2'
-        commit: 'sha1-55c2c1448f86e01eaae002a5a3a9624417608d84'
+    'golangci/golangci-lint-action@v9.3.0':
+        ref: 'v9.3.0'
+        commit: 'sha1-ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a'
         owner_id: 35628013
         repo_id: 232539879
     'goreleaser/goreleaser-action@v7.3.0':
